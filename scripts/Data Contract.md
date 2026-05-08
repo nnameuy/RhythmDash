@@ -14,22 +14,11 @@ JSON格式示例：
     "duration_sec": 125.5,
     "sample_rate": 22050,
     "bpm_map": [
-      {
-        "time_ms": 0,
-        "bpm": 120.0
-      },
-      {
-        "time_ms": 45000,
-        "bpm": 145.0
-      },
-      {
-        "time_ms": 80000,
-        "bpm": 120.0
-      }
+      { "time_ms": 0, "bpm": 120.0 },
+      { "time_ms": 45000, "bpm": 145.0 }
     ]
   },
-
-  "feature_stream": [
+  "entity_stream": [
     {
       "id": 1,
       "type": "onset_kick",
@@ -39,30 +28,32 @@ JSON格式示例：
     },
     {
       "id": 2,
-      "type": "onset_high",
-      "time_ms": 500,
-      "duration_ms": 30,
-      "intensity": 0.60,
-    },
-    {
-      "id": 3,
-      "type": "hold_melody",
+      "type": "hold_bass",
       "time_ms": 1000,
       "duration_ms": 1500,
-      "intensity": 0.75,
+      "intensity": 0.75
+    }
+  ],
+  "macro_stream": [
+    {
+      "id": 1001,
+      "type": "energy_buildup",
+      "time_ms": 30000,
+      "duration_ms": 15000,
+      "intensity": 0.5 
     },
     {
-      "id": 4,
-      "type": "onset_kick",
-      "time_ms": 2500,
-      "duration_ms": 50,
-      "intensity": 0.95
+      "id": 1002,
+      "type": "energy_drop",
+      "time_ms": 45000,
+      "duration_ms": 0,
+      "intensity": 1.0
     },
     {
-      "id": 5,
-      "type": "silence",
-      "time_ms": 2550,
-      "duration_ms": 2000,
+      "id": 1003,
+      "type": "silence_gap",
+      "time_ms": 80000,
+      "duration_ms": 4000,
       "intensity": 0.0
     }
   ]
@@ -73,12 +64,13 @@ JSON格式示例：
 
 1. **顶层结构**
    
-   JSON 文件包含两个主要部分：`metadata`和 `feature_stream`。
+   JSON 文件包含三个主要部分：`metadata`，`entity_stream`，`macro_stream`。
    
    ```json
    {
      "metadata": { ... },
-     "feature_stream": [ ... ]
+     "entity_stream": [ ... ],
+     "macro_stream": [ ... ]
    }
    ```
 
@@ -97,8 +89,6 @@ JSON格式示例：
    
    - `time_ms`: 发生 BPM 变化的绝对时间，首个元素应该为0。
    - `bpm` : 浮点数。该时间点开始的新 BPM 值。
-
-
 
 3. **Entity Stream (实体流)**
    
@@ -147,5 +137,6 @@ Macro Stream: type dict
 |:-------------------- |:-------------------- |:----------------- |
 | **`energy_buildup`** | 5-10秒内 RMS 能量呈稳定上升趋势 | 铺垫、鼓点加速（Build-up） |
 | **`energy_drop`**    | 经历 buildup 后能量突然极速爆发 | 副歌 (Drop)         |
+| **`silence_gap`**    | 音乐突然安静的段落            |                   |
 
 
