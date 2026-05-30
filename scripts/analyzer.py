@@ -11,23 +11,23 @@ import argparse
 import os
 
 # ============================================================
-# 常量定义（遵循 docs/tech-spec.md 规范）
+# 常量定义：遵循 docs/tech-spec.md 规范
 # ============================================================
 
 N_FFT = 2048
 HOP_LENGTH = 512
 
 # 频段定义 (Hz) — 消除 100-200Hz 和 2000-4000Hz 盲区
-BAND_LOW = (20, 200)        # 低频：Kick（含次低频 40-80Hz + 主体 80-200Hz）
-BAND_MID = (200, 4000)      # 中频：Snare（含鼓腔 200-400Hz + 脆响 1-4kHz）
-BAND_HIGH = (4000, None)    # 高频：Hi-hat（4kHz+ 镲片主体）
+BAND_LOW = (20, 200)        # 低频：Kick
+BAND_MID = (200, 4000)      # 中频：Snare
+BAND_HIGH = (4000, None)    # 高频：Hi-hat
 
 # Hold 检测：最短持续时间 (秒)
 HOLD_MIN_DURATION = 0.2
 
 # Macro 检测参数
 BUILDUP_WINDOW_SEC = 8.0     # buildup 检测窗口
-SILENCE_RMS_THRESHOLD = 0.02 # 静音 RMS 阈值（相对于最大 RMS）
+SILENCE_RMS_THRESHOLD = 0.02 # 静音 RMS 阈值
 SILENCE_MIN_DURATION = 0.5   # 最短静音时长 (秒)
 
 # 难度阈值
@@ -76,7 +76,7 @@ def detect_bpm(y, sr):
     """
     onset_env = librosa.onset.onset_strength(y=y, sr=sr)
 
-    # 方法1：自相关法（不依赖起始猜测）
+    # 方法1：自相关法
     ac = np.correlate(onset_env, onset_env, mode="full")
     ac = ac[len(ac) // 2:]
     lag_times = np.arange(1, len(ac)) * HOP_LENGTH / sr
@@ -101,11 +101,11 @@ def detect_bpm(y, sr):
     closest = min(tempo_results, key=lambda t: abs(t - bpm_ac))
     global_bpm = round((bpm_ac + closest) / 2.0, 1)
 
-    # -- bpm_map：默认只有一条 （恒速歌曲）--
+    # -- bpm_map：默认无变速 --
     bpm_map = [{"time_ms": 0, "bpm": float(global_bpm)}]
 
     # 仅在歌曲 > 60 秒时，用 30 秒重叠窗口检查是否真有变速
-    # 要求连续两个窗口都偏离全局 BPM 才记录（防止单窗口假变奏）
+    # 要求连续两个窗口都偏离全局 BPM 才记录
     duration_sec = len(y) / sr
     if duration_sec > 60:
         window_sec = 30
@@ -141,14 +141,14 @@ def detect_bpm(y, sr):
 
 
 # ============================================================
-# Entity Stream 提取（节拍网格法）
+# Entity Stream 提取
 # ============================================================
 
 def compute_band_energies_at_frames(S_mag, sr, frames):
     """
     在给定的帧位置，分别计算 LOW/MID/HIGH 三个频段的能量。
     每个位置取前后各 1 帧的窗口平均，抗噪声。
-    返回: (low_vals, mid_vals, high_vals) 三个数组
+    返回: (low_vals, mid_vals, high_vals) 
     """
     low_energy = get_band_energy(S_mag, sr, BAND_LOW)
     mid_energy = get_band_energy(S_mag, sr, BAND_MID)
@@ -232,7 +232,7 @@ def detect_melody_holds(y_harmonic, sr, beat_frames, entity_id_start):
             hop_length=HOP_LENGTH,
         )
     except Exception:
-        return [], entity_id_start  # pyin 可能在某些音频上失败
+        return [], entity_id_start  # pyin 可能在某些音频上失败。
 
     if f0 is None or voiced_flag is None:
         return [], entity_id_start
@@ -429,7 +429,7 @@ def extract_entity_stream(y, sr):
                     })
                     entity_id += 1
 
-    # -- E. Hold 检测（在和声分量上做，避开军鼓污染）--
+    # -- E. Hold 检测--
     S_harm = librosa.stft(y_harmonic, n_fft=N_FFT, hop_length=HOP_LENGTH)
     S_harm_mag = np.abs(S_harm)
 
@@ -535,7 +535,7 @@ def extract_entity_stream(y, sr):
 
 
 # ============================================================
-# Macro Stream 提取
+# Macro Stream
 # ============================================================
 
 def extract_macro_stream(y, sr):
@@ -588,7 +588,7 @@ def extract_macro_stream(y, sr):
         x = np.arange(len(segment))
         slope, _ = np.polyfit(x, segment, 1)
 
-        # 斜率足够大、且整体能量不是特别低（排除静音段）
+        # 斜率足够大、且整体能量不是特别低，排除静音段
         if slope > 1e-5 and segment.mean() > SILENCE_RMS_THRESHOLD * 2:
             # 检查 buildup 之后是否有 drop
             drop_start = start + window_frames
@@ -627,7 +627,7 @@ def extract_macro_stream(y, sr):
 def filter_by_difficulty(entity_stream, macro_stream, threshold):
     """
     按 intensity 阈值过滤 entity_stream。
-    macro_stream 不受过滤影响（氛围效果全难度一致）。
+    macro_stream 不受过滤影响
     """
     if threshold == 0.0:
         filtered_entities = entity_stream
