@@ -1,3 +1,17 @@
 .idea/
 build/
 RhythmDash/
+.vs/
+
+# Claude Code — 内部指引文件不上传 GitHub
+.claude/
+CLAUDE.md
+
+# Python 缓存
+scripts/__pycache__/
+
+# 生成的关卡数据（由 analyzer.py 产出，不上传）
+assets/data/*.json
+
+# 调试可视化图片（本地测试用，不上传）
+assets/debug/

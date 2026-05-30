@@ -138,5 +138,3 @@ Macro Stream: type dict
 | **`energy_buildup`** | 5-10秒内 RMS 能量呈稳定上升趋势 | 铺垫、鼓点加速（Build-up） |
 | **`energy_drop`**    | 经历 buildup 后能量突然极速爆发 | 副歌 (Drop)         |
 | **`silence_gap`**    | 音乐突然安静的段落            |                   |
-
-
